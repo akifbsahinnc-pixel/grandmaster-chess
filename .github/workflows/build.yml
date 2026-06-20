@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04  # Sorun çıkaran en güncel sürüm yerine kararlı eski sürüme döndük
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Kodlari Cek
@@ -44,4 +44,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: GrandMaster-Chess-APK
-        path: .buildozer/android/platform/build-arm64-v8a_armeabi-v7a/dists/grandmaster/*.apk
+        # Bu sihirli yıldızlar sayesinde nerede olursa olsun üretilen tüm APK'ları yakalayacak:
+        path: .buildozer/**/*.apk
