@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04  # Sorun çıkaran en güncel sürüm yerine kararlı eski sürüme döndük
 
     steps:
     - name: Kodlari Cek
@@ -24,12 +24,6 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Gerekli Android Paketlerini Yukle
-      run: |
-        # Kilitlenmeyi önlemek için apt-get adımlarını optimize ettik
-        sudo apt-get update -y
-        sudo apt-get install -y libsqlite3-dev shadow-utils libffi-dev libssl-dev python3-setuptools
-
     - name: Buildozer ve Kivy Yukle
       run: |
         pip install --upgrade pip
@@ -40,12 +34,9 @@ jobs:
         buildozer init
         sed -i 's/requirements = python3,kivy/requirements = python3,kivy,chess/g' buildozer.spec
         sed -i 's/android.api = 31/android.api = 33/g' buildozer.spec
-        # Eğer logoyu bulamazsa hata vermesin diye varsayılan ikonda bıraktık, kararlılık için önemli
-        sed -i 's/android.sdk = 31/android.sdk = 33/g' buildozer.spec
 
     - name: APK Derleme Islemini Baslat
       run: |
-        # Otomatik olarak tüm Android lisanslarını kabul etmesini sağlıyoruz
         mkdir -p ~/.android && touch ~/.android/repositories.cfg
         yes | buildozer -v android debug
 
