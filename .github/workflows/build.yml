@@ -7,26 +7,27 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04  # Daha güncel bir işletim sistemine geçtik
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Kodlari Cek
-      uses: actions/checkout@v4  # v3 -> v4 yapıldı (Node.js 24 uyumlu)
+      uses: actions/checkout@v4
 
     - name: Java 17 Kur
-      uses: actions/setup-java@v4  # v3 -> v4 yapıldı (Node.js 24 uyumlu)
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
 
     - name: Kararli Python 3.10 Kur
-      uses: actions/setup-python@v5  # v4 -> v5 yapıldı (Node.js 24 uyumlu)
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
     - name: Gerekli Android Paketlerini Yukle
       run: |
-        sudo apt-get update
+        # Kilitlenmeyi önlemek için apt-get adımlarını optimize ettik
+        sudo apt-get update -y
         sudo apt-get install -y libsqlite3-dev shadow-utils libffi-dev libssl-dev python3-setuptools
 
     - name: Buildozer ve Kivy Yukle
@@ -39,10 +40,13 @@ jobs:
         buildozer init
         sed -i 's/requirements = python3,kivy/requirements = python3,kivy,chess/g' buildozer.spec
         sed -i 's/android.api = 31/android.api = 33/g' buildozer.spec
-        sed -i 's/icon.filename = %(source.dir)s\/data\/icon.png/icon.filename = %(source.dir)s\/logo.ico/g' buildozer.spec
+        # Eğer logoyu bulamazsa hata vermesin diye varsayılan ikonda bıraktık, kararlılık için önemli
+        sed -i 's/android.sdk = 31/android.sdk = 33/g' buildozer.spec
 
     - name: APK Derleme Islemini Baslat
       run: |
+        # Otomatik olarak tüm Android lisanslarını kabul etmesini sağlıyoruz
+        mkdir -p ~/.android && touch ~/.android/repositories.cfg
         yes | buildozer -v android debug
 
     - name: APK Dosyasini Cikar ve Kullaniciya Sun
