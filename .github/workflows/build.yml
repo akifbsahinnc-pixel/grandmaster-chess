@@ -40,9 +40,14 @@ jobs:
         mkdir -p ~/.android && touch ~/.android/repositories.cfg
         yes | buildozer -v android debug
 
-    - name: APK Dosyasini Cikar ve Kullaniciya Sun
+    - name: Sunucudaki Tum APK Dosyalarini Bul ve Kopyala
+      run: |
+        # APK dosyasını bulup ana dizine kopyalıyoruz ki GitHub rahatça yakalasın
+        mkdir -p output_apk
+        find . -name "*.apk" -exec cp {} output_apk/ \;
+
+    - name: APK Dosyasini Kullaniciya Sun
       uses: actions/upload-artifact@v4
       with:
         name: GrandMaster-Chess-APK
-        # Bu sihirli yıldızlar sayesinde nerede olursa olsun üretilen tüm APK'ları yakalayacak:
-        path: .buildozer/**/*.apk
+        path: output_apk/
