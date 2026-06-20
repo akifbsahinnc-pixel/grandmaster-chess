@@ -1,0 +1,53 @@
+name: BuildMaster APK Build
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Kodlari Cek
+      uses: actions/checkout@v3
+
+    - name: Java 17 Kur
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Kararli Python 3.10 Kur
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Gerekli Android Paketlerini Yukle
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libsqlite3-dev shadow-utils libffi-dev libssl-dev python3-setuptools
+
+    - name: Buildozer ve Kivy Yukle
+      run: |
+        pip install --upgrade pip
+        pip install buildozer kivy Cython==0.29.36
+
+    - name: buildozer.spec Dosyasini Otomatik Olustur
+      run: |
+        buildozer init
+        # Gereksinimleri (chess kütüphanesini) spec dosyasına otomatik enjekte ediyoruz
+        sed -i 's/requirements = python3,kivy/requirements = python3,kivy,chess/g' buildozer.spec
+        sed -i 's/android.api = 31/android.api = 33/g' buildozer.spec
+        sed -i 's/icon.filename = %(source.dir)s\/data\/icon.png/icon.filename = %(source.dir)s\/logo.ico/g' buildozer.spec
+
+    - name: APK Derleme Islemini Baslat
+      run: |
+        yes | buildozer -v android debug
+
+    - name: APK Dosyasini Cikar ve Kullaniciya Sun
+      uses: actions/upload-artifact@v4
+      with:
+        name: GrandMaster-Chess-APK
+        path: .buildozer/android/platform/build-arm64-v8a_armeabi-v7a/dists/grandmaster/*.apk
